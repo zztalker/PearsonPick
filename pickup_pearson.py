@@ -12,8 +12,7 @@ rc('text.latex',preamble='sepackage[utf8]{inputenc}')
 rc('text.latex',preamble='sepackage[russian]{babel}')
 
 
-data_array = 6
-
+data_array = int(sys.argv[1])
 
 x,y = np.loadtxt("data{0}.csv".format(data_array),delimiter=",")
 
@@ -46,8 +45,8 @@ for i in range(0,x.shape[0]):
 print(pears)
 
 #Calc function points
-lB = np.min(pears.x__)+5
-rB = np.max(pears.x__)+5
+lB = np.min(pears.x__)
+rB = np.max(pears.x__)
 x1 = np.linspace(lB,rB,1000)
 y1 = np.ndarray(x1.shape)
 for i in range(0,1000):
@@ -55,14 +54,15 @@ for i in range(0,1000):
 
 
 #Claculation for BAR - there is an ERROR
-#leftBorder = -pears.f.a[1]
-#ii = 0
-#for i in x:
-#    rightBorder = i-pears.Mx
-#    p_cal[ii] = spint.quad(pears.f.fun,leftBorder,rightBorder)[0]
-#    ii+=1
-#    leftBorder = rightBorder
+leftBorder = lB
+ii = 0
+for i in x:
+    rightBorder = i-pears.Mx
 
+    p_cal[ii] = spint.quad(pears.f.fun,leftBorder,rightBorder)[0]
+    ii+=1
+#    leftBorder = rightBorder
+print(p_cal)
 #Original Datas
 plt.bar(pears.x__,y,  color="white") #width=pears.c,
 plt.ylabel("N")
@@ -87,20 +87,6 @@ plt.xlabel("X")
 plt.title('Compare Bar and Pearson-Curve TYPE: {0}'.format(pears.type))
 plt.savefig('data_curve_bar_%d.png'%data_array)
 
-
-exit()
-
-#Compare bars
-#plt.subplot(121)
-plt.bar(x,p, width=pears.c, color="white")
-plt.bar(x,p_cal,width=pears.c/2, color="lightgrey")
-plt.ylabel("P")
-plt.xlabel("X")
-plt.title(r"Histogram of $x$ and calculated $x'$")
-plt.show()
-exit()
-
-
 #plt.subplot(122)
 
 # посчитаем квантиль распределения хи квадрат
@@ -121,4 +107,4 @@ for chi2critical in spstat.chi2.ppf([0.01,0.05,0.1],ii-1):
 if not b_chi2:
     print( "Pearson criteria UNSUCCESSFUL for alpha<0.1, gamma>0.9")
     
-print( "Проверка функции плотности распредлеения, интеграл должен быть равен 1: ", spint.quad(pears.f.fun,-pears.f.a[1],pears.f.a[2]))
+#print( "Проверка функции плотности распредлеения, интеграл должен быть равен 1: ", spint.quad(pears.f.fun,-pears.f.a[1],pears.f.a[2]))

@@ -128,7 +128,7 @@ class fIV:
  #        self.y0 = y0_1*y0_2        
   #       return
     def __str__(self):
-        s = "Type VI function params:\n"
+        s = "Type IV function params:\n"
         s += "\n    l: "+str(self.l)
         s += "\n    q: "+str(self.q)
         s += "\n    v: "+str(self.v)
@@ -148,7 +148,12 @@ class fV:
         return
 
     def __str__(self):
-        s = ""
+        s = "Type V function params:\n"
+        s += "\n    v: "+str(self.v)
+        s += "\n    p: "+str(self.p)
+        s += "\n    n0: "+str(self.n0)
+        s += "\n"
+        return s
         return s
     def fun(self, x):
         return self.n0 * pow(x, - self.p) * pow(math.e, - self.v / x)
