@@ -31,7 +31,7 @@ class fI:
         self.a[2] = v * self.m[2] + M
 
         y0_1 = pow(self.a[1], self.m[1]) * pow(self.a[2], self.m[2])
-        y0_1 = y0_1 / pow(self.a[1] + self.a[2], self.m[1] + self.m[2] + 1)
+        y0_1 /= pow(self.a[1] + self.a[2], self.m[1] + self.m[2] + 1)
 
         y0_2 = sp.gamma(self.m[1] + self.m[2] + 2) / (sp.gamma(self.m[1] + 1) * sp.gamma(self.m[2] + 1))
 
@@ -108,35 +108,6 @@ class fIV:
     def fun(self, x):
         return self.n0 * pow(1 + x ** 2 / self.l[2] ** 2, -self.q) * pow(math.e, -self.v * math.atan(x / self.l[2]))
 
-        #   def __init__(self,beta,r,mu,M):
-        #        #посчитаем необходимые коэффициенты
-        #        self.a = []
-        #        self.m = []
-        #        self.y0 = 0
-        #        sigma = math.sqrt(mu[2])
-        #        p = np.poly1d([1,-(r-2),-(r-1)+(4*r*r*(r+1))/(beta[1]*(r+2)*(r+2)+16*(r+1))])
-        #        m = p.r
-        #        self.m = [1,0.,0.]
-        #        if mu[3]>0:
-        #            self.m[2] = max(m)
-        #            self.m[1] = min(m)
-        #        else:
-        #            self.m[1] = max(m)
-        #            self.m[2] = min(m)
-        #        print(beta[1]*(r+2)*(r+2)+16*(r+1))
-        #        v = sigma/(2*(r-2))*math.sqrt(beta[1]*(r+2)*(r+2)+16*(r+1))
-        #        self.a = [1,0.,0.]
-        #        self.a[1] = v*self.m[1]-M
-        #        self.a[2] = v*self.m[2]+M
-        #
-        #      y0_1 = pow(self.a[1],self.m[1])*pow(self.a[2],self.m[2])
-        #        y0_1 = y0_1/pow(self.a[1]+self.a[2],self.m[1]+self.m[2]+1)
-        #
-        #       y0_2 = sp.gamma(self.m[1]+self.m[2]+2)/(sp.gamma(self.m[1]+1)*sp.gamma(self.m[2]+1))
-
-        #        self.y0 = y0_1*y0_2
-        #       return
-
     def __str__(self):
         s = "Type IV function params:\n"
         s += "\n    l: " + str(self.l)
@@ -144,8 +115,6 @@ class fIV:
         s += "\n    v: " + str(self.v)
         s += "\n"
         return s
-        #  def fun(self,x):
-        #     return self.y0*pow(1+x/self.a[1],self.m[1])*pow(1-x/self.a[2],self.m[2])
 
 
 class fV:
@@ -162,7 +131,6 @@ class fV:
         s += "\n    p: " + str(self.p)
         s += "\n    n0: " + str(self.n0)
         s += "\n"
-        return s
         return s
 
     def fun(self, x):
@@ -213,7 +181,7 @@ class pearson:
             self.type = "unknown! " + str(self.k)
 
     def __str__(self):
-        s = "Pearson params: \n"
+        s = "\nPearson params: \n"
         s += "\nXmin: " + str(self.Xmin)
         s += "\nXmax: " + str(self.Xmax)
         s += "\nc: " + str(self.c)
@@ -271,9 +239,4 @@ class pearson:
         self.mu[3] = self.m[3] - 3 * self.m[2] * self.m[1] + 2 * pow(self.m[1], 3)
         self.mu[4] = self.m[4] - 4 * self.m[3] * self.m[1] + 6 * self.m[2] * pow(self.m[1], 2) - 3 * pow(self.m[1], 4)
 
-        #        for i in range(len(x)):
-        #            self.mu[1] += p[i]*((x[i]-self.Mx))
-        #            self.mu[2] += p[i]*pow(x[i]-self.Mx,2)
-        #            self.mu[3] += p[i]*pow(x[i]-self.Mx,3)
-        #            self.mu[4] += p[i]*pow(x[i]-self.Mx,4)
         return self.mu
