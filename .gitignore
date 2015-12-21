@@ -219,3 +219,5 @@ pip-log.txt
 
 .idea/
 __pycache__/
+.idea/misc.xml
+.idea/PearsonPick.iml
