@@ -3,7 +3,6 @@ import sys
 import scipy.integrate as spint
 import scipy.stats as spstat
 import numpy as np
-from sympy import integrate
 
 import pearson
 import matplotlib.pyplot as plt
@@ -41,53 +40,74 @@ if x.shape != y.shape:
 # y - массив частот попадания
 # p - массив вероятностей
 pears = pearson.pearson(x, p)
-# x = _x[i] + self.c - self.Xa
-# x_= (x[i] + self.c - self.Xa) / self.c
-print("X", "N(p)", "X-Xa", "(X-Xa)/c", sep="\t")
-for i in range(0, x.shape[0]):
-    print(x[i], y[i], pears.x_[i], pears.x__[i], sep="\t")
+# x_ = _x[i] + self.c - self.Xa                  - смещенная относительно центра сл.вел
+# x__= (x[i] + self.c - self.Xa) / self.c        - смещенная и нормированная сл.вел
 
-print(pears)
+with open('data/data_calc.csv', 'w') as csvfile:
+    for i in range(0, x.shape[0]):
+        test = [x[i],y[i],p[i],pears.x_[i],pears.x__[i]]
+        csv.writer(csvfile).writerow(test)
+
+with open('data/report.txt','w') as reportfile:
+    reportfile.write(pears.__str__())
 
 # Calc function points
-lB = np.min(pears.x__)
-rB = np.max(pears.x__)
-x1 = np.linspace(lB, rB, 1000)
-y1 = np.ndarray(x1.shape)
-# расчет y_i    ####косяяяяяяк
+lB = np.min(pears.x__)-2 # левая граница, как миниму смещенного и центрированного массива
+rB = np.max(pears.x__) # правая как максимум
+x1 = np.linspace(lB, rB, 1000) # 1000 точек
+y1 = np.ndarray(x1.shape) # значения функции той же размерности
+
 print('y1 = f.fun(x[i])\n')
-i = 1
-for i in x1:
-    y1[i] = pears.f.fun(i)
-    print(str(y1[i]) + ' ')
+i = 0
+for xi in x1:
+    y1[i] = pears.f.fun(xi)
     i += 1
 
+with open('data/test_function.csv','w') as csvfile:
+    i = 0
+    for xi in x1:
+        csvfile.write("{0},{1}\n".format(xi,y1[i]))
+        i += 1
+
+
 # Claculation for BAR - there is an ERROR
-leftBorder = lB
-ii = 0
-for i in x:
-    rightBorder = i - pears.Mx
-    p_cal[ii] = spint.quad(pears.f.fun, leftBorder, rightBorder)[0]
-    ii += 1
-leftBorder = rightBorder
-print(p_cal)
-#
+with open('data/test_int.csv','w') as csvfile:
+    ii = 1
+    leftBorder = np.min(pears.x__)
+    p_cal[0] = spint.quad(pears.f.fun, -4.111, leftBorder)[0] # ЗДЕСЬ 4.111 - это левая граница для функции
+    csvfile.write("{0},{1},{2},{3}\n".format(leftBorder,-np.inf,leftBorder,p_cal[0]))
+    rightBorder = np.max(pears.x__)
+    count = len(pears.x__)
+    delta = (rightBorder-leftBorder)/count
+    print("Tets integrall:",spint.quad(pears.f.fun,-4.111,9)) # ЗДЕСЬ 4.111 - это левая граница для функции, 9 - правая
+    for i in pears.x__[1:]:
+        rightBorder = i
+        p_cal[ii] = spint.quad(pears.f.fun, leftBorder, rightBorder)[0]
+        csvfile.write("{0},{1},{2},{3}\n".format(i,leftBorder,rightBorder,p_cal[ii]))
+        leftBorder = rightBorder
+        ii += 1
+    p_cal_ = spint.quad(pears.f.fun, leftBorder,9)[0] # ЗДЕСЬ 9 - это правая граница для функции
+    csvfile.write("{0},{1},{2},{3}\n".format(leftBorder,leftBorder,np.infty,p_cal_))
+
 # # Original Datas
-# plt.bar(pears.x__, y, color="white")  # width=pears.c,
-# plt.ylabel("N")
-# plt.xlabel(r"$x = (X - X_a)/c$")
-# plt.title(r'Histogram of $x$')
-# plt.savefig('data_bar_%d.png' % data_array)
-# plt.clf()
+plt.bar(pears.x__, y, color="white")  # width=pears.c,
+plt.ylabel("N")
+plt.xlabel(r"$x = (X - X_a)/c$")
+plt.title(r'Histogram of $x$')
+plt.savefig('data/data_bar_%d.png' % data_array)
+plt.clf()
 #
 # # Curve
-# plt.plot(x1, y1)
-# plt.ylabel("P")
-# plt.xlabel("X")
-# plt.title('Pearson-Curve TYPE: {0}'.format(pears.type))
-# plt.savefig('data_curve_%d.png' % data_array)
-# plt.clf()
-#
+x_bar = pears.x__.copy()-delta
+plt.plot(x1, y1)
+plt.ylabel("P")
+plt.xlabel("X")
+plt.title('Pearson-Curve TYPE: {0}'.format(pears.type))
+plt.bar(x_bar,p,  color="white")
+plt.bar(x_bar,p_cal, width=0.4, color="0.8")
+plt.savefig('data/data_curve_%d.png' % data_array)
+plt.clf()
+
 # # Curve and Bar
 # plt.bar(pears.x__, p, color="white")  # width=pears.c,
 # plt.plot(x1, y1)
@@ -118,43 +138,3 @@ for chi2critical in spstat.chi2.ppf([0.01, 0.05, 0.1], ii - 1):
 
 if not b_chi2:
     print("Pearson criteria UNSUCCESSFUL for alpha<0.1, gamma>0.9")
-
-for i in range(0, x.shape[0]):
-    print(x[i])
-test = []
-for i in pears.x_:
-    test.append(str(i))
-
-with open('x_.csv', 'w') as csvfile:
-    csv.writer(csvfile).writerow(test)
-
-test.clear()
-
-for i in pears.x__:
-    test.append(i)
-with open('data/x__.csv', 'w') as csvfile:
-    csv.writer(csvfile).writerow(test)
-
-test.clear()
-
-for i in p:
-    test.append(str(i))
-with open('data/p.csv', 'w') as csvfile:
-    csv.writer(csvfile).writerow(test)
-
-test.clear()
-
-for i in y1:
-    test.append(str(i))
-with open('data/y.csv', 'w') as csvfile:
-    csv.writer(csvfile).writerow(test)
-
-test.clear()
-
-print('\nTEST\n')
-print("C=",pears.c,'\n')
-for i in x1:
-    print (i)
-    test.append(str(spint.quad(pears.f.fun, i - 0.5, i + 0.5)))
-with open('data/y_.csv', 'w') as csvfile:
-    csv.writer(csvfile).writerow(test)
