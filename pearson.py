@@ -52,7 +52,7 @@ class fI:
         self.l = ['border = ', 0., 0.]
         self.l[1] = q[1] * L / (S - 2)
         self.l[2] = q[2] * L / (S - 2)
-        print(self.l) 
+        print(self.l)
 
 
         return

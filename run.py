@@ -52,8 +52,10 @@ with open('data/report.txt','w') as reportfile:
     reportfile.write(pears.__str__())
 
 # Calc function points
-lB = np.min(pears.x__)-2 # левая граница, как миниму смещенного и центрированного массива
-rB = np.max(pears.x__) # правая как максимум
+# lB = np.min(pears.x__)-2 # левая граница, как миниму смещенного и центрированного массива
+# rB = np.max(pears.x__) # правая как максимум
+lB = pears.f.l[1]
+rB = pears.f.l[2]
 x1 = np.linspace(lB, rB, 1000) # 1000 точек
 y1 = np.ndarray(x1.shape) # значения функции той же размерности
 
