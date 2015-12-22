@@ -13,7 +13,7 @@ class func_pearson:
 
 
 class fI:
-    def __init__(self, beta, r, mu, M):
+    def __init__(self, beta, r, mu, M, rk, sigma, k):
         # посчитаем необходимые коэффициенты
         sigma = math.sqrt(mu[2])
         p = np.poly1d([1, -(r - 2), -(r - 1) + (4 * r * r * (r + 1)) / (beta[1] * (r + 2) * (r + 2) + 16 * (r + 1))])
@@ -29,13 +29,32 @@ class fI:
         self.a = ["a coefficient", 0., 0.]
         self.a[1] = v * self.m[1] - M
         self.a[2] = v * self.m[2] + M
-
         y0_1 = pow(self.a[1], self.m[1]) * pow(self.a[2], self.m[2])
         y0_1 /= pow(self.a[1] + self.a[2], self.m[1] + self.m[2] + 1)
-
         y0_2 = sp.gamma(self.m[1] + self.m[2] + 2) / (sp.gamma(self.m[1] + 1) * sp.gamma(self.m[2] + 1))
-
         self.y0 = y0_1 * y0_2
+        # считаем шраницы
+        # нужные коэф
+        S = (6 * (rk[4] - rk[3] ** 2 - 1)) / (3 * rk[3] ** 2 - 2 * rk[4] + 6)
+        print('S = ', S)
+        print(rk)
+        print((S + 1) * (1 - k))
+        print('k = ', k)
+        t = math.sqrt(rk[3] ** 2 * (S + 2) ** 2 + 16 * (S + 1))
+        # t = 4 * math.sqrt((S + 1) * (1 - k))
+        q = ['q =', 0., 0.]
+        q[1] = 0.5 * ((S - 2) + S * (S + 2) * rk[3] / t)
+        q[2] = 0.5 * ((S - 2) - S * (S + 2) * rk[3] / t)
+        print(q)
+        L = sigma * t / 2
+        print('L =', L)
+        # сами границы
+        self.l = ['border = ', 0., 0.]
+        self.l[1] = q[1] * L / (S - 2)
+        self.l[2] = q[2] * L / (S - 2)
+        print(self.l) 
+
+
         return
 
     def __str__(self):
@@ -145,17 +164,17 @@ class pearson:
         self.beta[1] = pow(mu[3], 2) / pow(mu[2], 3)
         self.beta[2] = mu[4] / pow(mu[2], 2)
         beta = self.beta
-        self.r = 6. * (beta[2] - beta[1] - 1.) / (3. * beta[1] - 2. * beta[2] + 6.)
-        r = self.r
+        self.r = 6. * (beta[2] - beta[1] - 1.) / (3. * beta[1] - 2. * beta[2] + 6.)  # похож на S коэф
+        # r = self.r
         self.rk = ['r-koef', 0., 0., 0., 0.]
         self.rk[3] = mu[3] / pow(self.sigma, 3)
         self.rk[4] = mu[4] / pow(self.sigma, 4)
 
         self.b = [0., 0., 0.]
         b = self.b
-        b[0] = mu[2] * (r + 1.) / (r - 2.)
-        b[1] = mu[3] * (r + 2.) / (2. * mu[2] * (r - 2.))
-        b[2] = -1. / (r - 2.)
+        b[0] = mu[2] * (self.r + 1.) / (self.r - 2.)
+        b[1] = mu[3] * (self.r + 2.) / (2. * mu[2] * (self.r - 2.))
+        b[2] = -1. / (self.r - 2.)
         self.M = -b[1]
         self.k = pow(b[1], 2) / (4 * b[2] * b[0])
         if round(self.k, 1) == 0:
@@ -169,7 +188,7 @@ class pearson:
             self.type = "III"
         elif self.k < 0:
             self.type = "I"
-            self.f = fI(beta, r, mu, self.M)
+            self.f = fI(beta, self.r, mu, self.M, self.rk, self.sigma, self.k)
         elif (self.k < 1):
             self.type = "IV"
             self.f = fIV(self.rk, self.sigma, self.Mx)
