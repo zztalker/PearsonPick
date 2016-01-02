@@ -9,11 +9,6 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 import csv
 
-rc('font', **{'family': 'verdana'})
-rc('text.latex', unicode=True)
-rc('text.latex', preamble='sepackage[utf8]{inputenc}')
-rc('text.latex', preamble='sepackage[russian]{babel}')
-
 print("введите порядковый номер файла (1-7)")
 data_array = int(input())
 
@@ -51,6 +46,8 @@ with open('data/data_calc.csv', 'w') as csvfile:
 with open('data/report.txt','w') as reportfile:
     reportfile.write(pears.__str__())
 
+print(pears.f.l)
+exit()
 # Calc function points
 # lB = np.min(pears.x__)-2 # левая граница, как миниму смещенного и центрированного массива
 # rB = np.max(pears.x__) # правая как максимум
@@ -76,21 +73,20 @@ with open('data/test_function.csv','w') as csvfile:
 with open('data/test_int.csv','w') as csvfile:
     ii = 1
     leftBorder = np.min(pears.x__)
-    print(pears.f.l)
-    p_cal[0] = spint.quad(pears.f.fun, pears.f.l[1], leftBorder)[0] # ЗДЕСЬ 4.111 - это левая граница для функции
-    csvfile.write("{0},{1},{2},{3}\n".format(leftBorder,pears.f.l[1],leftBorder,p_cal[0]))
+    p_cal[0] = spint.quad(pears.f.fun, -4.111, leftBorder)[0] # ЗДЕСЬ 4.111 - это левая граница для функции
+    csvfile.write("{0},{1},{2},{3}\n".format(leftBorder,-np.inf,leftBorder,p_cal[0]))
     rightBorder = np.max(pears.x__)
     count = len(pears.x__)
     delta = (rightBorder-leftBorder)/count
-    print("Tets integrall:",spint.quad(pears.f.fun,pears.f.l[1],pears.f.l[2])) # ЗДЕСЬ 4.111 - это левая граница для функции, 9 - правая
+    print("Tets integrall:",spint.quad(pears.f.fun,-4.111,9)) # ЗДЕСЬ 4.111 - это левая граница для функции, 9 - правая
     for i in pears.x__[1:]:
         rightBorder = i
         p_cal[ii] = spint.quad(pears.f.fun, leftBorder, rightBorder)[0]
         csvfile.write("{0},{1},{2},{3}\n".format(i,leftBorder,rightBorder,p_cal[ii]))
         leftBorder = rightBorder
         ii += 1
-    p_cal_ = spint.quad(pears.f.fun, leftBorder,pears.f.l[2])[0] # ЗДЕСЬ 9 - это правая граница для функции
-    csvfile.write("{0},{1},{2},{3}\n".format(leftBorder,leftBorder,pears.f.l[2],p_cal_))
+    p_cal_ = spint.quad(pears.f.fun, leftBorder,9)[0] # ЗДЕСЬ 9 - это правая граница для функции
+    csvfile.write("{0},{1},{2},{3}\n".format(leftBorder,leftBorder,np.infty,p_cal_))
 
 # # Original Datas
 plt.bar(pears.x__, y, color="white")  # width=pears.c,

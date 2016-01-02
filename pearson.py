@@ -3,16 +3,25 @@ import numpy as np
 import scipy.special as sp
 import math
 
-
+# прото  класс для всех будущих функций
+# TODO: свойства l - границы, p - параметры, т.е. все параметры упаковываем в массив или словарь
 class func_pearson:
+    l = ["border",0,0]
+    p = {'a':["a params",0,0]} #это для примера
+    type = "Unknown"
     def __str__(self):
-        return "Unknown function"
-
+        param = ""
+        for (key,value) in self.p:
+            param = "{0} {1}, ".format(key,value)
+        return "="*10+"""
+        Pearson curve type {type}
+        Main params: {param}
+        """.format(type=self.type,param=param)+"\n="*10
     def fun(self, x):
         return 0
 
-
-class fI:
+#TODO: убрать _str_ - сделать, что бы работал от наследуемого класса
+class fI(func_pearson):
     def __init__(self, beta, r, mu, M, rk, sigma, k):
         # посчитаем необходимые коэффициенты
         sigma = math.sqrt(mu[2])
@@ -49,11 +58,11 @@ class fI:
         L = sigma * t / 2
         print('L =', L)
         # сами границы
-        self.l = ['border = ', 0., 0.]
-        self.l[1] = q[1] * L / (S - 2)
-        self.l[2] = q[2] * L / (S - 2)
+        self.l = ['border = ', -self.a[1], self.a[2]]
+        #self.l[1] = q[1] * L / (S - 2)
+        #self.l[2] =- q[2] * L / (S - 2)
         print(self.l)
-
+        print(123456)
 
         return
 
@@ -62,6 +71,7 @@ class fI:
         s += "\n    a1,a2: " + str(self.a)
         s += "\n    m1,m2: " + str(self.m)
         s += "\n    y0: " + str(self.y0)
+        s += "\n    l:  " + str(self.l)
         s += "\n"
         return s
 
@@ -69,11 +79,13 @@ class fI:
         return self.y0 * pow(1 + x / self.a[1], self.m[1]) * pow(1 - x / self.a[2], self.m[2])
 
 
-class fII:
+class fII(func_pearson):
     def __init__(self, beta, mu):
         self.m = (5 * beta[2] - 9) / (2 * (3 - beta[2]))
         self.a = math.sqrt(2 * mu[2] * beta[2] / (3 - beta[2]))
         self.y0 = sp.gamma((2 * self.m + 1) / 2) / (self.a * math.sqrt(math.pi) * sp.gamma(self.m + 1))
+        self.l[1] = -self.a
+        self.l[2] = self.a
         return
 
     def __str__(self):
@@ -86,11 +98,11 @@ class fII:
     def fun(self, x):
         return self.y0 * pow(1 - x * x / (self.a * self.a), self.m)
 
-
-class fIII:
+#TODO: разобраться с реализацией функции и границами
+class fIII(func_pearson):
     def __init__(self, r, sigma, summ):
         self.p = 4 / pow(r[3], 2) - 1
-        self.l = ['granica l', 0., 0.]
+        l = ['granica l', 0., 0.]
         self.l[2] = sigma * (2 / r[3] - r[3] / 2)
         self.l[1] = -self.l[2]
         self.n0 = (summ / self.l[2]) * ((self.p + 1) / (pow(math.e, self.p) * sp.gamma(self.p + 1)))
@@ -108,7 +120,8 @@ class fIII:
         return self.n0 * pow(1 + x / self.l[2], self.p) * pow(math.e, -self.p * x / self.l[2])
 
 
-class fIV:
+#TODO: разобраться с реализацией функции и границами
+class fIV(func_pearson):
     def __init__(self, r, sigma, summ):
         R = (6 * (r[4] - r[3] ** 2 - 1)) / (2 * r[4] - 3 * r[3] ** 2 - 6)
         print(R)
@@ -117,7 +130,7 @@ class fIV:
         print('q=', self.q)
         print('v=', self.v)
         # print('sqrt=', 16 * (R - 1) - pow(r[3], 2) * pow(R - 2, 2))
-        self.l = ['granica l', 0., 0.]
+        #self.l = ['granica l', 0., 0.]
         self.l[2] = (sigma / 4) * math.sqrt(16 * (R - 1) - pow(r[3], 2) * pow(R - 2, 2))
         self.l[1] = -self.l[2]
         # print(R, ' ', self.v)
@@ -136,9 +149,11 @@ class fIV:
         return s
 
 
-class fV:
+#TODO: разобраться с реализацией функции и границами
+class fV(func_pearson):
     def __init__(self, r, sigma, summ):
-        self.l = ['granica l', 0., 2.5]
+        self.l[1] = 0.
+        self.l[2] = np.infty
         self.p = 4 + math.sqrt((8 + 4 * math.sqrt(4 + r[3] ** 2)) / r[3] ** 2)
         self.v = sigma * (self.p - 2) * math.sqrt(self.p - 3)
         self.n0 = (summ * pow(self.v, self.p - 1)) / (sp.gamma(self.p - 1))
@@ -159,6 +174,7 @@ class fV:
 class pearson:
     def __init__(self, x, p):
         mu = self.moments(x, p)
+        self.l = ['l border: ',0,0]
         self.sigma = math.sqrt(mu[2])
         self.beta = ["beta array", 0., 0.]
         self.beta[1] = pow(mu[3], 2) / pow(mu[2], 3)
@@ -246,8 +262,8 @@ class pearson:
         self.x__ = x.copy()
 
         for i in range(len(x)):
-            self.x_[i] = x[i] + self.c - self.Xa
-            self.x__[i] = (x[i] + self.c - self.Xa) / self.c
+            self.x_[i] = x[i] + self.c/2 - self.Xa
+            self.x__[i] = (x[i] + self.c/2 - self.Xa) / self.c
             self.m[1] += p[i] * (((x[i] + self.c / 2) - self.Xa) / self.c)
             self.m[2] += p[i] * pow(((x[i] + self.c / 2) - self.Xa) / self.c, 2)
             self.m[3] += p[i] * pow(((x[i] + self.c / 2) - self.Xa) / self.c, 3)
